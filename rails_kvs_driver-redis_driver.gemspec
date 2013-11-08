@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = RailsKvsDriver::RedisDriver::VERSION
   spec.authors       = ["alfa-jpn"]
   spec.email         = ["a.nkmr.ja@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = "redis driver for rails kvs driver."
+  spec.summary       = "redis driver for rails kvs driver."
   spec.homepage      = "https://github.com/alfa-jpn/rails_kvs_driver-redis_driver"
   spec.license       = "MIT"
 
@@ -24,5 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "yard"
 
   spec.add_dependency "redis"
-  spec.add_dependency "rails_kvs_driver", "0.0.1"
+  spec.add_dependency "rails_kvs_driver", "0.0.2"
 end

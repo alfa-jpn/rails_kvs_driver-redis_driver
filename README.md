@@ -1,6 +1,6 @@
 # RailsKvsDriver::RedisDriver
 
-TODO: Write a gem description
+Redis Driver for Rails_Kvs_Driver.
 
 ## Installation
 
@@ -18,7 +18,7 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+comming soon.
 
 ## Contributing
 
