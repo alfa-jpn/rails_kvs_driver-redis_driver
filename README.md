@@ -1,6 +1,6 @@
 # RailsKvsDriver::RedisDriver
 
-Redis Driver for Rails_Kvs_Driver.
+Redis Driver for [Rails_Kvs_Driver](https://github.com/alfa-jpn/rails-kvs-driver).
 
 ## Installation
 
