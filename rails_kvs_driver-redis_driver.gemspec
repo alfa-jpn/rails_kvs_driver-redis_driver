@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["a.nkmr.ja@gmail.com"]
   spec.description   = %q{TODO: Write a gem description}
   spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/alfa-jpn/rails_kvs_driver-redis_driver"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
