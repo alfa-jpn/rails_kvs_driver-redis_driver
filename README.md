@@ -25,7 +25,11 @@ driver_config = {
   :port        => 6379,        # port of redis
   :namespace   => 'Example',   # namespace of key
   :timeout_sec => 5,           # timeout seconds
-  :pool_size   => 5            # connection pool size
+  :pool_size   => 5,           # connection pool size
+  :config_key  => :none        # This key is option. (default=:none)
+                               #   when set this key.
+                               #   will refer to a connection-pool based on config_key,
+                               #   even if driver setting is the same without this key.
 }
 ```
 
@@ -41,8 +45,17 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   # get value from redis.
   puts redis['animation']   # => 'good!'
   
+  # exec each
+  redis.each do |key,value|
+    puts "#{key} is #{value}!" # => animation is good!!
+                               # => nyarukosan is kawaii!!
+  end
+  
+  # check existed.
+  redis.has_key?('animation') # => true
+  
   # get all keys.
-  redis.all_keys.each {|key| puts key } # => animation nyarukosan
+  redis.keys    # => ['animation', 'nyarukosan']
   
   # delete key from redis.
   redis.delete('nyarukosan')
@@ -58,32 +71,46 @@ end
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
   # set member to redis.
-  redis.add_sorted_set('animations', 'nyarukosan',   10)
-  redis.add_sorted_set('animations', 'nonnonbiyori',  5)
-  redis.add_sorted_set('animations', 'kiniromosaic',  1)
+  redis.sorted_sets['animations'] = ['nyarukosan',   10]
+  redis.sorted_sets['animations'] = ['nonnonbiyori',  5]
+  redis.sorted_sets['animations'] = ['kiniromosaic',  1]
   
   # increment score of member.
-  redis.increment_stored_set('animations', 'nyarukosan',  1) # => increment nyarukosan score 10 -> 11
-  redis.increment_stored_set('animations', 'nyarukosan', -1) # => increment nyarukosan score 11 -> 10
+  redis.sorted_sets.increment('animations', 'nyarukosan',  1) # => increment nyarukosan score 10 -> 11
+  redis.sorted_sets.increment('animations', 'nyarukosan', -1) # => increment nyarukosan score 11 -> 10
   
   # execute the block of code for each member of sorted set.
-  redis.each_sorted_set('animations', true) do |member, score, position|
+  redis.sorted_sets.each_member('animations', true) do |member, score, position|
     puts "#{position+1}:#{member} is #{score}pt." # => '1:nyarukosan is 10pt.'
                                                   # => '2:nonnonbiyori is 5pt.'
                                                   # => '3:kiniromosaic is 1pt.'
   end
+  
+  # get all keys
+  redis.sorted_sets.keys? # => ['animations']
+  
+  # execute the block of code for each keys.
+  redis.sorted_sets.each do |key|
+    puts key # => animations
+  end
  
   # get array of sorted set.
-  redis.sorted_set('animation') # => Array[[member,score],....]
+  redis.sorted_sets['animation'] # => Array[[member,score],....]
  
   # get score of member.
-  redis.sorted_set_score('animations', 'nyarukosan') # => 10 
+  redis.sorted_sets['animations', 'nyarukosan'] # => 10 
  
   # count member of sorted set.
-  redis.count_sorted_set_member('animations') # => 3
+  redis.sorted_sets.count('animations') # => 3
   
   # remove member of sorted set.
-  redis.remove_sorted_set('animations', 'nonnonbiyori')
+  redis.sorted_sets.remove('animations', 'nonnonbiyori')
+  
+  # check existed sorted set
+  redis.sorted_sets.has_key?('animations') # => false
+  
+  # length sorted set
+  redis.sorted_set.length # => 0
  
 end
 ```
