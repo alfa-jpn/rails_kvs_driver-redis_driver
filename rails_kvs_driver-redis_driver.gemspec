@@ -24,5 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "yard"
 
   spec.add_dependency "redis"
-  spec.add_dependency "rails_kvs_driver", "0.0.3"
+  spec.add_dependency "rails_kvs_driver", "0.1.5"
 end
