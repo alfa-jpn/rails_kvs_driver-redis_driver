@@ -242,8 +242,18 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
           driver_class::session(driver_config) do |kvs|
             kvs.add_sorted_set('example',  'element', 10)
 
-            expect(kvs.sorted_sets.has_key?('example')).to be_true
-            expect(kvs.sorted_sets.has_key?('nothing key')).to be_false
+            expect(kvs.sorted_sets.has_key?('example')).to      be_true
+            expect(kvs.sorted_sets.has_key?('nothing key')).to  be_false
+          end
+        end
+
+        it 'call has_member?' do
+          driver_class::session(driver_config) do |kvs|
+            kvs.add_sorted_set('example',  'element', 10)
+
+            expect(kvs.sorted_sets.has_member?('example','element')).to         be_true
+            expect(kvs.sorted_sets.has_member?('example','nothing member')).to  be_false
+            expect(kvs.sorted_sets.has_member?('nothing key', 'element')).to    be_false
           end
         end
 

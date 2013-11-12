@@ -115,6 +115,9 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
 end
 ```
 
+# API DOCUMENT
+
+* [RailsKvsDriver-RedisDriver](http://rubydoc.info/github/alfa-jpn/rails_kvs_driver-redis_driver/master/frames)
 
 
 ## Contributing
