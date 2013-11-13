@@ -71,46 +71,62 @@ end
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
   # set member to redis.
-  redis.sorted_sets['animations'] = ['nyarukosan',   10]
-  redis.sorted_sets['animations'] = ['nonnonbiyori',  5]
-  redis.sorted_sets['animations'] = ['kiniromosaic',  1]
-  
+  redis.sorted_sets['anime']['nyarukosan']   = 10
+  redis.sorted_sets['anime']['nonnonbiyori'] = 10
+  redis.sorted_sets['anime']['kiniromosaic'] = 10
+
+  # or can use this.
+  redis.sorted_set['fruit'] = [['apple', 1], [orange, 2]]
+
+
+  # get score of member.
+  redis.sorted_sets['anime']['nyarukosan'] # => 10
+
+
   # increment score of member.
-  redis.sorted_sets.increment('animations', 'nyarukosan',  1) # => increment nyarukosan score 10 -> 11
-  redis.sorted_sets.increment('animations', 'nyarukosan', -1) # => increment nyarukosan score 11 -> 10
-  
+  redis.sorted_sets['anime'].increment('nyarukosan',  1) # => increment nyarukosan score 10 -> 11
+  redis.sorted_sets['anime'].increment('nyarukosan', -1) # => increment nyarukosan score 11 -> 10
+
+
+  # execute the block of code for each keys.
+  redis.sorted_sets.each do {|key| puts key }  # => anime fruit
+
   # execute the block of code for each member of sorted set.
-  redis.sorted_sets.each_member('animations', true) do |member, score, position|
+  redis.sorted_sets['anime'].each(true) do |member, score, position|
     puts "#{position+1}:#{member} is #{score}pt." # => '1:nyarukosan is 10pt.'
                                                   # => '2:nonnonbiyori is 5pt.'
                                                   # => '3:kiniromosaic is 1pt.'
   end
-  
+
+
   # get all keys
-  redis.sorted_sets.keys? # => ['animations']
-  
-  # execute the block of code for each keys.
-  redis.sorted_sets.each do |key|
-    puts key # => animations
-  end
- 
-  # get array of sorted set.
-  redis.sorted_sets['animation'] # => Array[[member,score],....]
- 
-  # get score of member.
-  redis.sorted_sets['animations', 'nyarukosan'] # => 10 
- 
-  # count member of sorted set.
-  redis.sorted_sets.count('animations') # => 3
-  
+  redis.sorted_sets.keys? # => ['anime', 'fruit']
+
+  # get all members
+  redis.sorted_sets['anime'].members? # => nyarukosan nonnonbiyori kiniromosaic
+
+
+  # length of sorted set.
+  redis.sorted_sets.length # => 2
+
+  # length member of sorted set.
+  redis.sorted_sets['anime'].length # => 3
+
+
+
+  # delete key
+  redis.sorted_sets.delete('fruit')
+
   # remove member of sorted set.
-  redis.sorted_sets.remove('animations', 'nonnonbiyori')
-  
-  # check existed sorted set
-  redis.sorted_sets.has_key?('animations') # => false
-  
-  # length sorted set
-  redis.sorted_set.length # => 0
+  redis.sorted_sets['anime'].remove('nonnonbiyori')
+
+
+  # check if key exist.
+  redis.sorted_sets.has_key?('fruit') # => false
+
+  # check if member exist.
+  redis.sorted_sets['anime'].has_member?('nyarukosan') # => true
+
  
 end
 ```
