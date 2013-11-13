@@ -72,11 +72,11 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
   # set member to redis.
   redis.sorted_sets['anime']['nyarukosan']   = 10
-  redis.sorted_sets['anime']['nonnonbiyori'] = 10
-  redis.sorted_sets['anime']['kiniromosaic'] = 10
+  redis.sorted_sets['anime']['nonnonbiyori'] =  5
+  redis.sorted_sets['anime']['kiniromosaic'] =  1
 
   # or can use this.
-  redis.sorted_set['fruit'] = [['apple', 1], [orange, 2]]
+  redis.sorted_set['fruit'] = [['apple', 1], ['orange', 2]]
 
 
   # get score of member.
