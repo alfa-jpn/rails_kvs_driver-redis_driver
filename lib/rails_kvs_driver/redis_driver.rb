@@ -14,7 +14,7 @@ module RailsKvsDriver::RedisDriver
     # get value from kvs.
     # @param key [String] key.
     # @return [String] value. when doesn't exist, nil.
-    def [](key)
+    def get(key)
       @kvs_instance.get(safe_key(key))
     end
 
@@ -22,7 +22,7 @@ module RailsKvsDriver::RedisDriver
     # @param key    [String] key.
     # @param value  [String] value.
     # @return [Boolean] result
-    def []=(key, value)
+    def set(key, value)
       @kvs_instance.set(safe_key(key), value)
     end
 

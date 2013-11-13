@@ -26,17 +26,17 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
     end
 
     context 'override methods' do
-      it 'call []' do
+      it 'call get' do
         driver_class::session(driver_config) do |kvs|
-          kvs['example'] = 'nico-nico'
-          expect(kvs['example']).to  eq('nico-nico')
-          expect(kvs['nothing key']).to be_nil
+          kvs.set('example', 'nico-nico')
+          expect(kvs.get('example')).to  eq('nico-nico')
+          expect(kvs.get('nothing key')).to be_nil
         end
       end
 
-      it 'call []=' do
+      it 'call set' do
         driver_class::session(driver_config) do |kvs|
-          expect{ kvs['example'] = 'nico-nico' }.to change{ kvs.keys.length }.by(1)
+          expect{ kvs.set('example', 'nico-nico') }.to change{ kvs.keys.length }.by(1)
         end
       end
 
@@ -156,6 +156,19 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
 
 
     context 'inheritance methods' do
+      it 'call []' do
+        driver_class::session(driver_config) do |kvs|
+          kvs['example'] = 'nico-nico'
+          expect(kvs['example']).to  eq('nico-nico')
+          expect(kvs['nothing key']).to be_nil
+        end
+      end
+
+      it 'call []=' do
+        driver_class::session(driver_config) do |kvs|
+          expect{ kvs['example'] = 'nico-nico' }.to change{ kvs.keys.length }.by(1)
+        end
+      end
 
       it 'call each' do
         driver_class::session(driver_config) do |kvs|
@@ -178,120 +191,137 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
       end
 
       context 'sorted_sets' do
+        before(:each) do
+          driver_class::session(driver_config) do |kvs|
+            kvs.add_sorted_set('anime', 'nyaruko', 1024)
+            kvs.add_sorted_set('anime', 'haganai', 100)
+          end
+        end
 
         it 'call []' do
           driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example', 'element', 1024)
-            kvs.add_sorted_set('example', 'element2', 1)
-
-            expect(kvs.sorted_sets['example'].length).to    eq(2)
-            expect(kvs.sorted_sets['example','element']).to eq(1024)
+            expect(kvs.sorted_sets['anime'].instance_of?(RailsKvsDriver::SortedSets::SortedSet)).to be_true
           end
         end
 
         it 'call []=' do
           driver_class::session(driver_config) do |kvs|
-            kvs.sorted_sets['example'] = ['element', 1]
-            kvs.sorted_sets['example'] = ['element2', 1]
 
-            expect(kvs.sorted_sets['example'].length).to eq(2)
+            expect{
+              kvs.sorted_sets['fruit'] = [['Apple', 1], ['Orange', 2]]
+            }.to change{
+              kvs.sorted_sets.length
+            }.by(1)
+
+            expect(kvs.sorted_sets['fruit'].length).to eq(2)
           end
         end
 
-        it 'call count' do
-          driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example', 'element', 1)
-            kvs.add_sorted_set('example', 'element2', 1)
-
-            expect(kvs.sorted_sets.count('example')).to eq(2)
-          end
-        end
 
         it 'call delete' do
           driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example', 'element', 1)
-            kvs.add_sorted_set('example2', 'element2', 1)
-
-            expect{kvs.sorted_sets.delete('example2')}.to change{kvs.sorted_sets.length}.by(-1)
+            expect{kvs.sorted_sets.delete('anime')}.to change{kvs.sorted_sets.length}.by(-1)
           end
         end
 
         it 'call each' do
           driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example', 'element', 1)
-            kvs.add_sorted_set('example2', 'element2', 1)
-
             kvs.sorted_sets.each do |key|
-              expect(kvs.sorted_sets[key].length).not_to eq(0)
-            end
-          end
-        end
-
-        it 'call each_member' do
-          driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example', 'element', 10)
-            kvs.add_sorted_set('example', 'element2', 1)
-
-            kvs.sorted_sets.each_member('example') do |member, score, position|
-              expect(kvs.sorted_sets['example', member]).to eq(score)
+              expect(key).to eq('anime')
             end
           end
         end
 
         it 'call has_key?' do
           driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example',  'element', 10)
-
-            expect(kvs.sorted_sets.has_key?('example')).to      be_true
+            expect(kvs.sorted_sets.has_key?('anime')).to        be_true
             expect(kvs.sorted_sets.has_key?('nothing key')).to  be_false
-          end
-        end
-
-        it 'call has_member?' do
-          driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example',  'element', 10)
-
-            expect(kvs.sorted_sets.has_member?('example','element')).to         be_true
-            expect(kvs.sorted_sets.has_member?('example','nothing member')).to  be_false
-            expect(kvs.sorted_sets.has_member?('nothing key', 'element')).to    be_false
-          end
-        end
-
-        it 'call increment' do
-          driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example',  'element', 10)
-
-            expect{kvs.sorted_sets.increment('example','element', 1)}.to change{kvs.sorted_sets['example','element']}.by(1)
-            expect{kvs.sorted_sets.increment('example','element', -1)}.to change{kvs.sorted_sets['example','element']}.by(-1)
           end
         end
 
         it 'call keys' do
           driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example',  'element', 10)
-            kvs.add_sorted_set('example2', 'element', 1)
-
-            expect(kvs.sorted_sets.keys.length).to eq(2)
+            expect(kvs.sorted_sets.keys.length).to eq(1)
           end
         end
 
         it 'call length' do
           driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example',  'element', 10)
-            kvs.add_sorted_set('example2', 'element', 1)
-
-            expect(kvs.sorted_sets.length).to eq(2)
+            expect(kvs.sorted_sets.length).to eq(1)
           end
         end
 
-        it 'call remove' do
-          driver_class::session(driver_config) do |kvs|
-            kvs.add_sorted_set('example',  'element', 10)
-            kvs.add_sorted_set('example', 'element', 1)
 
-            expect{kvs.sorted_sets.remove('example', 'element')}.to change{kvs.sorted_sets.count('example')}.by(-1)
+        context 'sorted_set' do
+          it 'call []' do
+            driver_class::session(driver_config) do |kvs|
+              expect(kvs.sorted_sets['anime']['nyaruko']).to eq(1024)
+            end
           end
+
+          it 'call []=' do
+            driver_class::session(driver_config) do |kvs|
+              expect{
+                kvs.sorted_sets['manga']['dragonball'] = 1
+              }.to change{
+                kvs.sorted_sets['manga'].length
+              }.by(1)
+
+              expect{
+                kvs.sorted_sets['anime']['nonnonbiyori'] = 1
+              }.to change{
+                kvs.sorted_sets['anime'].length
+              }.by(1)
+            end
+          end
+
+          it 'call each' do
+            driver_class::session(driver_config) do |kvs|
+              kvs.sorted_sets['anime'].each do |member, score, position|
+                expect(kvs.sorted_sets['anime'][member]).to eq(score)
+              end
+            end
+          end
+
+          it 'call has_member?' do
+            driver_class::session(driver_config) do |kvs|
+              expect(kvs.sorted_sets['anime'].has_member?('nyaruko')).to         be_true
+              expect(kvs.sorted_sets['anime'].has_member?('noting member')).to   be_false
+            end
+          end
+
+
+          it 'call increment' do
+            driver_class::session(driver_config) do |kvs|
+              expect{kvs.sorted_sets['anime'].increment('nyaruko',  1)}.to change{kvs.sorted_sets['anime']['nyaruko']}.by(1)
+              expect{kvs.sorted_sets['anime'].increment('nyaruko', -1)}.to change{kvs.sorted_sets['anime']['nyaruko']}.by(-1)
+            end
+          end
+
+          it 'call length' do
+            driver_class::session(driver_config) do |kvs|
+              expect(kvs.sorted_sets['anime'].length).to eq(2)
+            end
+          end
+
+          it 'call members' do
+            driver_class::session(driver_config) do |kvs|
+              expect(kvs.sorted_sets['anime'].members.length).to eq(2)
+            end
+          end
+
+          it 'call remove' do
+            driver_class::session(driver_config) do |kvs|
+              expect{
+                kvs.sorted_sets['anime'].remove('haganai')
+              }.to change{
+                kvs.sorted_sets['anime'].length
+              }.by(-1)
+            end
+          end
+
         end
+
       end
     end
   end
