@@ -36,6 +36,8 @@ driver_config = {
 ### connect and exec basic (set/get/delete)
 session method enables connection pool.
 ``` ruby
+You can use Enumerable.
+
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
   # set key to redis.
@@ -66,8 +68,61 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
 end
 ```
 
+### list
+``` ruby
+lists include Enumerable.
+
+RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
+
+  # set value to list.
+  redis.lists['anime'][0]   = 'nyarukosan'
+  redis.lists['anime'][1]   = 'kinnmoza'
+  redis.lists['anime'][2]   = 'outbreakcompany'
+
+  # or can use this.
+  redis.lists['fruit'] = [:apple, :orange]
+
+
+  # get value of list.
+  puts redis.lists['anime'][0] # => 'nyarukosan'
+
+
+  # execute the block of code for each keys.
+  redis.lists.each do {|key| puts key }  # => anime fruit
+
+  # execute the block of code for each member of list.
+  redis.lists['anime'].each do |index, value|
+    puts "#{index}: #{value}." # => '0: nyarukosan.'
+                               # => '1: kinnmoza.'
+                               # => '2: outbreakcompany.'
+  end
+
+  # get all keys
+  redis.lists.keys? # => ['anime', 'fruit']
+
+  # length of sorted set.
+  redis.lists.length # => 2
+
+  # length member of sorted set.
+  redis.lists['anime'].length # => 3
+
+
+  # delete key
+  redis.lists.delete('fruit')
+
+  # remove member of list.
+  redis.lists['anime'].delete('kinnmoza')
+
+  # or can use this.
+  redis.lists['anime'].delete_at(1)
+
+end
+```
+
 ### sorted set
 ``` ruby
+sorted_sets include Enumerable.
+
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
   # set member to redis.

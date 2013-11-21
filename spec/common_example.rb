@@ -40,23 +40,6 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
         end
       end
 
-      it 'call add_sorted_set' do
-        driver_class::session(driver_config) do |kvs|
-          expect{
-            kvs.add_sorted_set('example', 'element', 1)
-          }.to change{ kvs.get_sorted_set_keys.length }.by(1)
-        end
-      end
-
-      it 'call count_sorted_set_member' do
-        driver_class::session(driver_config) do |kvs|
-          kvs.add_sorted_set('example', 'element1', 5)
-          kvs.add_sorted_set('example', 'element2', 5)
-          kvs.add_sorted_set('example', 'element3', 5)
-          expect(kvs.count_sorted_set_member('example')).to eq(3)
-        end
-      end
-
       it 'call delete' do
         driver_class::session(driver_config) do |kvs|
           kvs['example']  = 'nico-nico'
@@ -75,6 +58,148 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
           kvs['example2'] = 'movie'
 
           expect{ kvs.delete_all }.to change{ kvs.keys.length }.by(-2)
+        end
+      end
+
+      it 'call has_key?' do
+        driver_class::session(driver_config) do |kvs|
+          kvs['example'] = 'nico-nico'
+
+          expect(kvs.has_key?('example')).to be_true
+          expect(kvs.has_key?('nothing key')).to be_false
+        end
+      end
+
+      it 'call keys' do
+        driver_class::session(driver_config) do |kvs|
+          kvs['example0'] = 'nico-nico'
+          kvs['example1'] = 'nico-nico'
+          kvs.add_sorted_set('example_ss', 'element5', 5)
+
+          expect(kvs.keys.length).to eq(2)
+        end
+      end
+
+
+      #--------------------
+      # list (same as list of redis. refer to redis.)
+      #--------------------
+
+      it 'call count_list_value' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+
+          expect(kvs.count_list_value('anime')).to eq(2)
+        end
+      end
+
+      it 'call delete_list_value' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+          kvs.push_list_last('anime', 'hoge')
+
+          expect{
+            kvs.delete_list_value('anime', 'hoge')
+          }.to change{ kvs.count_list_value('anime') }.by(-1)
+          expect(kvs.get_list_values('anime').include?('hoge')).to be_false
+        end
+      end
+
+      it 'call delete_list_value_at 0' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'hoge')
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+
+          expect{
+            kvs.delete_list_value_at('anime', 0)
+          }.to change{ kvs.count_list_value('anime') }.by(-1)
+          expect(kvs.get_list_values('anime').include?('hoge')).to be_false
+        end
+      end
+
+      it 'call get_list_keys' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+
+          expect(kvs.get_list_keys.length).to eq(1)
+        end
+      end
+
+      it 'call get_list_value' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+
+          expect(kvs.get_list_value('anime', 0)).to eq('nyaruko')
+        end
+      end
+
+      it 'call get_list_values' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+
+          expect(kvs.get_list_values('anime').length).to eq(2)
+        end
+      end
+
+      it 'call push_list_*' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+          kvs.push_list_first('anime', 'inuhasa')
+
+          expect(kvs.get_list_value('anime', 2)).to eq('kinmoza')
+          expect(kvs.get_list_value('anime', 0)).to eq('inuhasa')
+        end
+      end
+
+      it 'call pop_list_*' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+          kvs.push_list_first('anime', 'inuhasa')
+
+          expect{
+            expect(kvs.pop_list_first('anime')).to eq('inuhasa')
+            expect(kvs.pop_list_last('anime')).to eq('kinmoza')
+          }.to change{ kvs.count_list_value('anime') }.by(-2)
+        end
+      end
+
+      it 'call pop_list_*' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.push_list_last('anime', 'nyaruko')
+          kvs.push_list_last('anime', 'kinmoza')
+
+          kvs.set_list_value('anime', 1, 'inuhasa')
+
+          expect(kvs.get_list_value('anime', 1)).to eq('inuhasa')
+        end
+      end
+
+      #--------------------
+      # sorted set (same as sorted set of redis. refer to redis.)
+      #--------------------
+
+      it 'call add_sorted_set' do
+        driver_class::session(driver_config) do |kvs|
+          expect{
+            kvs.add_sorted_set('example', 'element', 1)
+          }.to change{ kvs.get_sorted_set_keys.length }.by(1)
+        end
+      end
+
+      it 'call count_sorted_set_member' do
+        driver_class::session(driver_config) do |kvs|
+          kvs.add_sorted_set('example', 'element1', 5)
+          kvs.add_sorted_set('example', 'element2', 5)
+          kvs.add_sorted_set('example', 'element3', 5)
+          expect(kvs.count_sorted_set_member('example')).to eq(3)
         end
       end
 
@@ -118,25 +243,6 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
           expect{
             kvs.increment_sorted_set('example', 'element', 10)
           }.to change{ kvs.get_sorted_set_score('example', 'element') }.by(10)
-        end
-      end
-
-      it 'call has_key?' do
-        driver_class::session(driver_config) do |kvs|
-          kvs['example'] = 'nico-nico'
-
-          expect(kvs.has_key?('example')).to be_true
-          expect(kvs.has_key?('nothing key')).to be_false
-        end
-      end
-
-      it 'call keys' do
-        driver_class::session(driver_config) do |kvs|
-          kvs['example0'] = 'nico-nico'
-          kvs['example1'] = 'nico-nico'
-          kvs.add_sorted_set('example_ss', 'element5', 5)
-
-          expect(kvs.keys.length).to eq(2)
         end
       end
 
@@ -189,6 +295,128 @@ shared_examples_for 'RailsKvsDriver example' do |driver_class, driver_config|
           expect(kvs.length).to eq(2)
         end
       end
+
+      context 'lists' do
+        before(:each) do
+          driver_class::session(driver_config) do |kvs|
+            kvs.push_list_last('anime', 'nyaruko')
+            kvs.push_list_last('anime', 'haganai')
+          end
+        end
+
+        it 'call[]' do
+          driver_class::session(driver_config) do |kvs|
+            expect(kvs.lists['anime'].instance_of?(RailsKvsDriver::Lists::List)).to be_true
+          end
+        end
+
+        it 'call []=' do
+          driver_class::session(driver_config) do |kvs|
+
+            expect{
+              kvs.lists['fruit'] = [:apple, :orange]
+            }.to change{
+              kvs.lists.length
+            }.by(1)
+
+            expect(kvs.lists['fruit'].length).to eq(2)
+          end
+        end
+
+        it 'call delete' do
+          driver_class::session(driver_config) do |kvs|
+            expect{kvs.lists.delete('anime')}.to change{kvs.lists.length}.by(-1)
+          end
+        end
+
+        it 'call each' do
+          driver_class::session(driver_config) do |kvs|
+            kvs.lists.each do |key|
+              expect(key).to eq('anime')
+            end
+          end
+        end
+
+        it 'call keys' do
+          driver_class::session(driver_config) do |kvs|
+            expect(kvs.lists.keys.length).to eq(1)
+          end
+        end
+
+        it 'call length' do
+          driver_class::session(driver_config) do |kvs|
+            expect(kvs.lists.length).to eq(1)
+          end
+        end
+
+        context 'lists' do
+          it 'call[]' do
+            driver_class::session(driver_config) do |kvs|
+              expect(kvs.lists['anime'][0]).to eq('nyaruko')
+            end
+          end
+
+          it 'call []=' do
+            driver_class::session(driver_config) do |kvs|
+              kvs.lists['anime'][1] = 'inuhasa'
+              expect(kvs.lists['anime'][1]).to eq('inuhasa')
+            end
+          end
+
+          it 'call delete' do
+            driver_class::session(driver_config) do |kvs|
+              expect{
+                kvs.lists['anime'].delete('nyaruko')
+              }.to change{ kvs.lists['anime'].length }.by(-1)
+              expect(kvs.lists['anime'][0]).to eq('haganai')
+            end
+          end
+
+          it 'call delete_at' do
+            driver_class::session(driver_config) do |kvs|
+              expect{
+                kvs.lists['anime'].delete_at(1)
+              }.to change{ kvs.lists['anime'].length }.by(-1)
+              expect(kvs.lists['anime'][0]).to eq('nyaruko')
+            end
+          end
+
+          it 'call each' do
+            driver_class::session(driver_config) do |kvs|
+              kvs.lists['anime'].each do |index, value|
+                expect(kvs.lists['anime'][index]).to eq(value)
+              end
+            end
+          end
+
+          it 'call each' do
+            driver_class::session(driver_config) do |kvs|
+              kvs.lists['anime'].each do |index, value|
+                expect(kvs.lists['anime'][index]).to eq(value)
+              end
+            end
+          end
+
+          it 'call include?' do
+            driver_class::session(driver_config) do |kvs|
+              expect(kvs.lists['anime'].include?('nyaruko')).to      be_true
+              expect(kvs.lists['anime'].include?('konnanonaiyo')).to be_false
+            end
+          end
+
+          it 'call push pop' do
+            driver_class::session(driver_config) do |kvs|
+              kvs.lists['anime'].push_first('rozen')
+              kvs.lists['anime'].push_last('maiden')
+
+              expect(kvs.lists['anime'].pop_first).to eq('rozen')
+              expect(kvs.lists['anime'].pop_last).to  eq('maiden')
+            end
+          end
+        end
+
+      end
+
 
       context 'sorted_sets' do
         before(:each) do
