@@ -35,8 +35,9 @@ driver_config = {
 
 ### connect and exec basic (set/get/delete)
 session method enables connection pool.
+You can use [Enumerable](http://docs.ruby-lang.org/ja/1.9.3/class/Enumerable.html).
+
 ``` ruby
-You can use Enumerable.
 
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
@@ -68,9 +69,12 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
 end
 ```
 
+detail [DefinedBaseMethod](http://rubydoc.info/github/alfa-jpn/rails-kvs-driver/RailsKvsDriver/DefinedBaseMethod)
+
 ### list
+lists include [Enumerable](http://docs.ruby-lang.org/ja/1.9.3/class/Enumerable.html).
+
 ``` ruby
-lists include Enumerable.
 
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
 
@@ -119,9 +123,14 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
 end
 ```
 
+detail [Lists](http://rubydoc.info/github/alfa-jpn/rails-kvs-driver/RailsKvsDriver/Lists/Lists)
+and [List](http://rubydoc.info/github/alfa-jpn/rails-kvs-driver/RailsKvsDriver/Lists/List)
+
+
 ### sorted set
+sorted_sets include [Enumerable](http://docs.ruby-lang.org/ja/1.9.3/class/Enumerable.html).
+
 ``` ruby
-sorted_sets include Enumerable.
 
 RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
   
@@ -185,6 +194,9 @@ RailsKvsDriver::RedisDriver::Driver::session(driver_config) do |redis|
  
 end
 ```
+
+detail [SortedSets](http://rubydoc.info/github/alfa-jpn/rails-kvs-driver/RailsKvsDriver/SortedSets/SortedSets)
+and [SortedSet](http://rubydoc.info/github/alfa-jpn/rails-kvs-driver/RailsKvsDriver/SortedSets/SortedSet)
 
 # API DOCUMENT
 
